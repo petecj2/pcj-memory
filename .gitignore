@@ -3,9 +3,11 @@ venv/
 env/
 ENV/
 .venv/
-.env/
 virtualenv/
 .virtualenv/
+*env/
+*venv/
+mem0env/
 __pycache__/
 *.pyc
 *.pyo
