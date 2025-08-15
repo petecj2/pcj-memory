@@ -1,0 +1,28 @@
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+virtualenv/
+.virtualenv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Dotfiles
+.*
+!.gitignore
+!.gitattributes
+!.github/
+!.gitlab-ci.yml
+!.travis.yml
+!.editorconfig
+!.eslintrc*
+!.prettierrc*
+!.babelrc*
+!.dockerignore
