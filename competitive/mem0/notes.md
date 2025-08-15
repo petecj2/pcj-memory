@@ -37,3 +37,44 @@
 ```
 Console now shows:
 ![Alt text](img/basic-mem0.jpg)
+
+## Langchain example
+- Had claude code build an example based on https://docs.mem0.ai/integrations/langchain
+- Resulting one file test is in 'langchain'
+- I told it about our trip to Seattle: "Hello, I'm Pete. I'm taking a trip to Seattle and have a flight on Delta later today. We'll also check into a Hyatt. What should I do in Seattle tomorrow?"
+    - It made some recommendations
+- I then told it about my NYC trip hoping it would pick up on Hyatt but it didn't
+- I then told it I was a World of Hyatt member with a strong preference for staying at those properties
+- Here's what the memory looks like after that exchange:
+
+![Alt text](img/langchain-session1.jpg)
+
+- Interesting how it categorized the session.
+- I then restared and asked it about a Maui itinerary in November for 5 days.
+- Seems like my code is wrong, having Claude Code fix
+    - The Mem0 console shows an accounting of my calls and correct results
+- Claude Code fixed, it got mixed up on the return type for the memories
+
+When the console shows:
+
+![Alt text](img/langchain-session2.jpg)
+
+My result shows:
+
+![Alt text](img/langchain-session2-terminal.jpg)
+
+And now when I ask about Maui, it only shows me Hyatt properties:
+
+![Alt text](img/langchain-session3-terminal.jpg)
+
+If I completely change topic:
+
+![Alt text](img/langchain-session4-terminal.jpg)
+
+The query into the memory store doesn't improve. It still returns everything about travel as before.
+
+Let me tell it more about Porter and then ask about Tom:
+
+![Alt text](img/langchain-session5-terminal.jpg)
+
+So, yeah, it gives me the right answer and pulled the right memory information about Porter, but it added extraneous information into the context window about travel that wasn't necessary.
