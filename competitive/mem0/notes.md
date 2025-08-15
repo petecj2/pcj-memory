@@ -36,4 +36,4 @@
 ]
 ```
 Console now shows:
-![Alt text](img/basic-mem0.png)
+![Alt text](img/basic-mem0.jpg)
