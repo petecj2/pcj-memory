@@ -6,7 +6,7 @@ import json
 api_key = os.getenv("MEM0_API_KEY")
 
 if not api_key:
-    raise ValueError("API key not found. Please set the MY_API_KEY environment variable.")
+    raise ValueError("API key not found. Please set the MEM0_API_KEY environment variable.")
 
 print("API key loaded successfully!")
 
