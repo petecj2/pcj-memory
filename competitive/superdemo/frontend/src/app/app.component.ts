@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { MemoryService, QueryRequest, QueryResponse, PerformanceMetrics } from './memory.service';
-import { forkJoin } from 'rxjs';
 
 export interface ConversationItem {
   query: string;
@@ -63,10 +62,10 @@ export interface ConversationItem {
           <div class="system-header">
             <img src="assets/mem0-logo-light.svg" alt="Mem0" class="system-logo">
           </div>
-          <div *ngIf="isLoading && mem0Conversation.length === 0" class="loading">
+          <div *ngIf="isLoadingMem0 && mem0Conversation.length === 0" class="loading">
             Loading Mem0 response...
           </div>
-          <div *ngIf="isLoading && mem0Conversation.length > 0" class="processing-indicator">
+          <div *ngIf="isLoadingMem0 && mem0Conversation.length > 0" class="processing-indicator">
             <div class="spinner"></div>
             <span>Processing new query...</span>
           </div>
@@ -92,7 +91,7 @@ export interface ConversationItem {
               </ul>
             </div>
           </div>
-          <div *ngIf="!isLoading && mem0Conversation.length === 0" class="loading">
+          <div *ngIf="!isLoadingMem0 && mem0Conversation.length === 0" class="loading">
             No conversations yet. Enter a query to start.
           </div>
         </div>
@@ -101,10 +100,10 @@ export interface ConversationItem {
           <div class="system-header">
             <img src="assets/zep-logo.svg" alt="Zep" class="system-logo">
           </div>
-          <div *ngIf="isLoading && zepConversation.length === 0" class="loading">
+          <div *ngIf="isLoadingZep && zepConversation.length === 0" class="loading">
             Loading Zep response...
           </div>
-          <div *ngIf="isLoading && zepConversation.length > 0" class="processing-indicator">
+          <div *ngIf="isLoadingZep && zepConversation.length > 0" class="processing-indicator">
             <div class="spinner"></div>
             <span>Processing new query...</span>
           </div>
@@ -132,7 +131,7 @@ export interface ConversationItem {
               </ul>
             </div>
           </div>
-          <div *ngIf="!isLoading && zepConversation.length === 0" class="loading">
+          <div *ngIf="!isLoadingZep && zepConversation.length === 0" class="loading">
             No conversations yet. Enter a query to start.
           </div>
         </div>
@@ -149,6 +148,10 @@ export class AppComponent {
   
   zepConversation: ConversationItem[] = [];
   mem0Conversation: ConversationItem[] = [];
+  
+  // Track loading state for each system independently
+  isLoadingZep: boolean = false;
+  isLoadingMem0: boolean = false;
 
   constructor(private memoryService: MemoryService) {}
 
@@ -158,6 +161,8 @@ export class AppComponent {
     }
 
     this.isLoading = true;
+    this.isLoadingZep = true;
+    this.isLoadingMem0 = true;
     this.error = '';
     
     const request: QueryRequest = {
@@ -167,43 +172,63 @@ export class AppComponent {
 
     const currentQuery = this.query;
     
-    // Make both API calls in parallel
-    forkJoin({
-      zep: this.memoryService.queryZep(request),
-      mem0: this.memoryService.queryMem0(request)
-    }).subscribe({
-      next: (responses) => {
+    // Clear query field immediately after capturing it
+    this.query = '';
+    
+    // Make Zep API call independently
+    this.memoryService.queryZep(request).subscribe({
+      next: (response) => {
         // Add Zep response to conversation
         this.zepConversation.unshift({
           query: currentQuery,
-          response: responses.zep.response,
-          retrievedMemory: responses.zep.retrieved_memory,
+          response: response.response,
+          retrievedMemory: response.retrieved_memory,
           timestamp: new Date(),
-          performanceMetrics: responses.zep.performance_metrics
+          performanceMetrics: response.performance_metrics
         });
-
-        // Add Mem0 response to conversation  
-        this.mem0Conversation.unshift({
-          query: currentQuery,
-          response: responses.mem0.response,
-          retrievedMemory: responses.mem0.retrieved_memory,
-          timestamp: new Date(),
-          performanceMetrics: responses.mem0.performance_metrics
-        });
-
-        // Reset query field
-        this.query = '';
-        this.isLoading = false;
+        
+        this.isLoadingZep = false;
+        this.checkAllLoaded();
       },
       error: (error) => {
-        console.error('Error:', error);
-        this.error = `Error processing query: ${error.error?.detail || error.message || 'Unknown error'}`;
-        this.isLoading = false;
+        console.error('Zep Error:', error);
+        this.error = `Zep Error: ${error.error?.detail || error.message || 'Unknown error'}`;
+        this.isLoadingZep = false;
+        this.checkAllLoaded();
+      }
+    });
+    
+    // Make Mem0 API call independently
+    this.memoryService.queryMem0(request).subscribe({
+      next: (response) => {
+        // Add Mem0 response to conversation
+        this.mem0Conversation.unshift({
+          query: currentQuery,
+          response: response.response,
+          retrievedMemory: response.retrieved_memory,
+          timestamp: new Date(),
+          performanceMetrics: response.performance_metrics
+        });
+        
+        this.isLoadingMem0 = false;
+        this.checkAllLoaded();
+      },
+      error: (error) => {
+        console.error('Mem0 Error:', error);
+        this.error = `Mem0 Error: ${error.error?.detail || error.message || 'Unknown error'}`;
+        this.isLoadingMem0 = false;
+        this.checkAllLoaded();
       }
     });
   }
+  
+  private checkAllLoaded() {
+    if (!this.isLoadingZep && !this.isLoadingMem0) {
+      this.isLoading = false;
+    }
+  }
 
-  trackByTimestamp(index: number, item: ConversationItem): number {
+  trackByTimestamp(_index: number, item: ConversationItem): number {
     return item.timestamp.getTime();
   }
 }
