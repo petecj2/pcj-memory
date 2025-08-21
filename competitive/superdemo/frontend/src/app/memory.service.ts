@@ -7,11 +7,21 @@ export interface QueryRequest {
   query: string;
 }
 
+export interface PerformanceMetrics {
+  user_setup_time_ms?: number;  // Optional, only for Zep
+  thread_create_time_ms?: number;  // Optional, only for Zep
+  search_time_ms: number;
+  chain_invoke_time_ms: number;
+  add_time_ms: number;
+  total_time_ms: number;
+}
+
 export interface QueryResponse {
   response: string;
   memory_saved: boolean;
   context_found: boolean;
   retrieved_memory: string[] | null;
+  performance_metrics?: PerformanceMetrics;
 }
 
 @Injectable({

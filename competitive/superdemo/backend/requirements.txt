@@ -6,3 +6,4 @@ langchain-core==0.1.52
 mem0ai==0.1.0
 zep-cloud==1.0.0
 python-multipart==0.0.6
+python-dotenv==1.0.0
